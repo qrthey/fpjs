@@ -8,6 +8,7 @@ var fp = (function () {
     function curry(fn) {
         return function () {
             var args = asArray(arguments);
+
             if (args.length === fn.length) {
                 return fn.apply(null, args);
             }
