@@ -19,8 +19,8 @@ provided by **fpjs**.
 ### Generating Functions
 
 Functional programming is foremost about programming with functions.
-The following functions can used to create new functions from existing
-ones.
+The following functions can be used to create new functions from
+existing ones.
 
 #### compose
 
