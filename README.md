@@ -7,117 +7,186 @@ Functional programming library for javascript.
 **fpjs** enables functional programming in javascript. While there are
 a great many javascript libraries to accomplish this, **fpjs** focuses
 on a minimal implementation (minified about 1kB) and simplicity both
-in its own implementation and towards client code using **fpjs**. 
+in its own implementation and towards client code using **fpjs**.
 
-## Documentation and Examples
+## Quick Refernce with Examples
 
-Minimalistic as the implementation of **fpjs** may be, this
-documentation section tries to be thorough and can be used as a mini
-tutorial. At least 1 example usage is shown for each of the functions
-provided by **fpjs**.
+### compose
 
-### Generating Functions
+*compose* takes 2 functions and returns a new function that first calls
+the second function on its given arguments and then calls the first
+function with the result of that call.
 
-Functional programming is foremost about programming with functions.
-The following functions can be used to create new functions from
-existing ones.
+    var f1 = function (x, y) { return x * y; };
+    var f2 = function (x) { return x + 10; };
+    var f3 = fp.compose(f2, f1); // reads 'f2 after f1'
+    var result = f3(4, 5);
+    console.log(result); // -> 30 ; (4 * 5) + 10
 
-#### compose
+### curry
 
-Takes 2 functions f and g, and returns a new function that
-effectively computes f(g(arguments));
+*curry* takes a function and returns a new function that can be given
+fewer parameters than expected by the original function. In that case,
+a new function that is itself curried is returned. When all parameters
+expected by the original function are eventually collected it is
+invoked and the result is returned.
 
-Assume the following 2 functions are defined.
+    var f = function (x, y, z) { return x + y + z; };
+    var fc = fp.curry(f);
+    console.log(fc(1, 2, 3)); // -> 6 ; behaves as original function
+    var fc1 = fc(1); // -> too few arguments so a new function is returned
+    console.log(fc1(2, 3)); // -> 6
+    var fc2 = fc1(2);
+    console.log(fc2(3)); // -> 6
+    console.log(fc(1)(2)(3)); // -> 6
 
-    function greet(name) { return 'Hello, ' + name; }
-    function count(str) { return str.length; }
+### negate
 
-Now, if you want to have a function *countGreeting* that counts that
-amount of characters in a greeting for a specific name, you could
-write that function, pottentially calling the existing greet and count
-function in your implementation. Or you can use *compose*, re-using
-the existing functions in a one-liner.
+*negate* takes a function and returns a new function that returns true
+if the result of invoking the original function is falsy, or false
+when the result is the original function is truethy.
 
-    var countGreeting = fp.compose(count, greet);
+    var f = function (x) { return x < 10; };
+    var fn = fp.negate(f);
+    console.log(fn(20)); // -> true ; as f(20) is false
 
-Which would read as 'count after greet'. You can test the resulting
-function. 
+### first
 
-    console.log(countGreeting('Bob')); // -> 10
+*first* returns the first item of an array.
 
-10 gets logged as it is the length of string *'Hello, Bob'*.
+    var x = fp.first([3, 1, 6, 8, 2]);
+    console.log(x); // -> 3
 
-*compose* can be used for any 2 functions where the output of one can
-be used as the input of the other.
+### last
 
-#### curry
+*last* returns the last item of an array.
 
-Takes a function f and returns a new curried function that when
-invoked with less arguments than expected by f will return a new
-curried function that awaits the remaining paramters. When a curried
-function is invoked with all of the expected remaining parameters (all
-parameters have been collected), the original function f is applied to
-them and the result is returned.
+    var x = fp.last([3, 1, 6, 8, 2]);
+    console.log(x); // -> 2
 
-While *compose* combines 2 functions into 1, *curry* effectively
-transforms a function into a function generator. An example goes a
-long way to explain this.
+### findFirst
 
-Suppose we have the following function defined.
+*findFirst* takes a predicate, ie. a function that returns either true or
+false, and an array with items. It returns the first item in the array
+for which the predicate returns true.
 
-    function calcResult(x, y, z) { return x * y - z; }
+    var pred = function (x) {return x > 5; };
+    var data = [3, 1, 6, 8, 2];
+    var result = fp.findFirst(pred, data);
+    console.log(result); // -> 6 ; the first number bigger than 5
 
-We can now create a curried version of *calcResult*.
+### findLast
 
-    var calcResultCurried = fp.curry(calcResult);
+*findLast* takes a predicate, ie. a function that returns either true or
+false, and an array of items. It returns the last item in the array
+for which the predicate returns true.
 
-If we invoke *calcResultCurried* with 3 arguments, like *calcResult*
-expected, the function behaves exactly like the original function.
+    var pred = function (x) {return x > 5; };
+    var data = [3, 1, 6, 8, 2];
+    var result = fp.findLast(pred, data);
+    console.log(result); // -> 8 ; the last number bigger than 5
 
-    console.log(calcResultCurried(3, 2, 1)); // -> 5
+### reduce
 
-But if *calcResultCurried* gets invoked with fewer paramters, say just
-1, a new curried function is returned in stead that will await the
-remaining 2 paramters.
+*reduce* takes a function of 2 parameters, an array and a start value.
+It then returns a value by applying the function to the start value
+and the first item in the array, then applying the function to that
+result and the second item of the array and so on.
 
-    var awaiting2More = calcResultCurried(3);
+    var f = function (x, y) { return x * y; }
+    var data = [3, 1, 6, 8, 2];
+    var result = fp.reduce(f, data, 12);
+    console.log(result); // -> 3456 ; (((((12 * 3) * 1) * 6) * 8) * 2)
 
-This function can then be called with the remaining 2 parameters
+### map
 
-    console.log(awaiting2More(2,1)); // -> 5
+*map* takes a function and an array and returns a new array which
+elements are the result of applying the function to each value in the
+array.
 
-or the function could again be called with fewer than exptected
-parameters
+    var f = function (x) { return x + 3; };
+    var data = [3, 1, 6, 8, 2];
+    var result = fp.map(f, data);
+    console.log(result); // -> [6, 4, 9, 11, 5]
 
-    var calc3Times2Minus = awaiting2More(2);
+### each
 
-and then finally
+*each* takes a function, that probably has some side effects, and an
+array and invokes the function on each item in the array. It then
+returns undefined.
 
-    console.log(calc3Times2Minus(1)); // -> 5
+    var f = function (x) { console.log("got " + x); };
+    var data = [3, 1, 6, 8, 2];
+    fp.each(f, data); // prints
+                      // got 3
+                      // got 1
+                      // got 6
+                      // got 8
+                      // got 2
+                      // and returns undefined
 
-*curry* is contaguous in this way; once a function is curried, calling
-it will return a function that is itself curried unless all parameters
-are known and the original function logic is to be invoked. The
-following statements are all equivalent.
+### filter
 
-    console.log(calcResultCurried(3,2,1)); // -> 5
-    console.log(calcResultCurried(3)(2,1)); // -> 5
-    console.log(calcResultCurried(3,2)(1)); // -> 5
-    console.log(calcResultCurried(3)(2)(1)); // -> 5
-    
-As currying works by collecting parameters from left to right, the
-order of parameters in a functions definition influence the usefulness
-of it in regards to *curry*.
+*filter* takes a predicate, ie. a function that returns either true or
+false, and an array of items. It returns a new array with the elements
+of the original array for which the predicate returns true.
 
-*curry* is an important function in **fpjs**. In fact, functions
-provided by **fpjs** that take multiple arguments are typically
-already curried. See [Manipulating Data](#manipulating-data) for
-somewhat more realistic examples of currying, why it can be usefull,
-and the importance of paramter ordering.
+    var pred = function (x) { return x > 5; };
+    var data = [3, 1, 6, 8, 2];
+    var result = fp.filter(pred, data);
+    console.log(result); // -> [6, 8];
 
-### Manipulating Data
+### getProperty
 
-*todo*
+*getProperty* that takes a property name (string) and returns a
+function that when given an object returns the value of the named
+property from that object.
+
+    var obj = {name: "Alan Turing", born: 1912};
+    var nameProp = fp.getProperty("name");
+    var result = nameProp(obj);
+    console.log(result); // -> Alan Turing
+
+
+### minBy
+
+*minBy* takes a function and an array and returns the item in the
+array for which the function returns the lowest value. If several
+items have the same, lowest, value, the first of them in the array is
+returned.
+
+    var data = [{name: "Alan Kay", born: 1940},
+                {name: "Alan Turing", born: 1912},
+                {name: "Peter Norvig", born: 1956},
+                {name: "John McCarthy", born: 1927}];
+
+    var bornProp = fp.getProperty("born");
+    var result = fp.minBy(bornProp, data);
+    console.log(result); // -> {name: 'Alan Turing', born: 1912}
+
+### maxBy
+
+*maxBy* takes a function and an array and returns the item in the
+array for which the function returns the highest value. If several
+items have the same, highest, value, the first of them in the array is
+returned.
+
+    var data = [{name: "Alan Kay", born: 1940},
+                {name: "Alan Turing", born: 1912},
+                {name: "Peter Norvig", born: 1956},
+                {name: "John McCarthy", born: 1927}];
+
+    var estimateAge = function (person) { return 2015 - person.born; };
+    var result = fp.maxBy(estimateAge, data);
+    console.log(result); // -> {name: 'Alan Turing', born: 1912}
+
+### indentity
+
+*identity* doesn't do a lot. It takes a single argument and returns
+it.
+
+    var result = fp.identity("John");
+    console.log(result); // -> John
 
 ## License
 
