@@ -9,7 +9,7 @@ a great many javascript libraries to accomplish this, **fpjs** focuses
 on a minimal implementation (minified about 1kB) and simplicity both
 in its own implementation and towards client code using **fpjs**.
 
-## Quick Refernce with Examples
+## Quick Reference with Examples
 
 ### compose
 
@@ -44,7 +44,7 @@ invoked and the result is returned.
 
 *negate* takes a function and returns a new function that returns true
 if the result of invoking the original function is falsy, or false
-when the result is the original function is truethy.
+when the result is the original function is thruthy.
 
     var f = function (x) { return x < 10; };
     var fn = fp.negate(f);
@@ -66,7 +66,7 @@ when the result is the original function is truethy.
 
 ### findFirst
 
-*findFirst* takes a predicate, ie. a function that returns either true or
+*findFirst* takes a predicate, i.e. a function that returns either true or
 false, and an array with items. It returns the first item in the array
 for which the predicate returns true.
 
@@ -77,7 +77,7 @@ for which the predicate returns true.
 
 ### findLast
 
-*findLast* takes a predicate, ie. a function that returns either true or
+*findLast* takes a predicate, i.e. a function that returns either true or
 false, and an array of items. It returns the last item in the array
 for which the predicate returns true.
 
@@ -127,7 +127,7 @@ returns undefined.
 
 ### filter
 
-*filter* takes a predicate, ie. a function that returns either true or
+*filter* takes a predicate, i.e. a function that returns either true or
 false, and an array of items. It returns a new array with the elements
 of the original array for which the predicate returns true.
 
@@ -180,7 +180,7 @@ returned.
     var result = fp.maxBy(estimateAge, data);
     console.log(result); // -> {name: 'Alan Turing', born: 1912}
 
-### indentity
+### identity
 
 *identity* doesn't do a lot. It takes a single argument and returns
 it.
